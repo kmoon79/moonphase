@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Phase Widget</title>
+    <style>
+        body {
+            font-family: "Georgia", serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fff;
+            color: #262626;
+        }
+        .widget {
+            text-align: center;
+            font-size: 20px;
+            border: 2px solid #d9d9d9;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .moon-message {
+            font-size: 12px;
+            font-style: italic;
+            color: #3c3c3c;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget" id="moonPhaseWidget">
+        Loading moon phase...
+    </div>
+
+    <script>
+        function getMoonPhase() {
+            const today = new Date();
+            const lp = 2551443; // Lunar cycle length in seconds (~29.53 days)
+            const newMoon = new Date(Date.UTC(2000, 0, 6, 18, 14, 0)); // Reference new moon
+            const phaseTime = (today - newMoon) / 1000 % lp;
+            const phaseIndex = Math.floor((phaseTime / lp) * 8); 
+            
+            const moonPhases = [
+                "🌑 New Moon", "🌒 Waxing Crescent", "🌓 First Quarter", "🌔 Waxing Gibbous",
+                "🌕 Full Moon", "🌖 Waning Gibbous", "🌗 Last Quarter", "🌘 Waning Crescent"
+            ];
+
+            const messages = [
+                "✦ time to rest ✦", "✦ time to plant the seed ✦", "✦ time to take action ✦", "✦ time to balance ✦", 
+                "✦ time to grow ✦", "✦ time to illuminate ✦", "✦ time to adjust ✦", "✦ time to stay steady ✦", 
+                "✦ time to wrap up ✦"
+            ];
+            
+            const phaseText = moonPhases[phaseIndex].split(" ");
+            return `<div>${phaseText[0]} <span>${phaseText.slice(1).join(" ")}</span></div>
+                    <div class='moon-message'>${messages[phaseIndex]}</div>`;
+        }
+
+        document.getElementById("moonPhaseWidget").innerHTML = getMoonPhase();
+    </script>
+</body>
+</html>
