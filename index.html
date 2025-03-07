@@ -11,15 +11,15 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #fff;
             color: #262626;
         }
         .widget {
             text-align: center;
             font-size: 20px;
-            border: 2px solid #d9d9d9;
+            border: 1px solid #ffffff;
             border-radius: 12px;
             padding: 20px;
+            background-color: #f3f3f3;
         }
         .moon-message {
             font-size: 12px;
@@ -35,16 +35,32 @@
     </div>
 
     <script>
-        function getMoonPhase() {
+        function getMoonPhase(isSouthernHemisphere) {
             const today = new Date();
-            const lp = 2551443; // Lunar cycle length in seconds (~29.53 days)
+            const lp = 29.53058867; // Lunar cycle length in days
             const newMoon = new Date(Date.UTC(2000, 0, 6, 18, 14, 0)); // Reference new moon
-            const phaseTime = (today - newMoon) / 1000 % lp;
-            const phaseIndex = Math.floor((phaseTime / lp) * 8); 
+            const daysSinceNew = (today - newMoon) / (1000 * 60 * 60 * 24);
+            const cycleDay = Math.floor(daysSinceNew % lp);
             
-            const moonPhases = [
-                "🌑 New Moon", "🌒 Waxing Crescent", "🌓 First Quarter", "🌔 Waxing Gibbous",
+            let phaseIndex;
+            if (cycleDay === 1) phaseIndex = 1; // Dark Moon (1 day)
+            else if (cycleDay === 2) phaseIndex = 2; // New Moon (1 day)
+            else if (cycleDay < 7) phaseIndex = 3; // Waxing Crescent
+            else if (cycleDay === 7) phaseIndex = 4; // First Quarter (1 day)
+            else if (cycleDay < 14) phaseIndex = 5; // Waxing Gibbous
+            else if (cycleDay === 14) phaseIndex = 6; // Full Moon (1 day)
+            else if (cycleDay < 21) phaseIndex = 7; // Waning Gibbous
+            else if (cycleDay === 21) phaseIndex = 8; // Last Quarter (1 day)
+            else phaseIndex = 9; // Waning Crescent
+
+            const northernPhases = [
+                "🌑 Dark Moon", "🌒 New Moon", "🌒 Waxing Crescent", "🌓 First Quarter", "🌔 Waxing Gibbous",
                 "🌕 Full Moon", "🌖 Waning Gibbous", "🌗 Last Quarter", "🌘 Waning Crescent"
+            ];
+            
+            const southernPhases = [
+                "🌑 Dark Moon", "🌘 New Moon", "🌘 Waxing Crescent", "🌗 First Quarter", "🌖 Waxing Gibbous",
+                "🌕 Full Moon", "🌔 Waning Gibbous", "🌓 Last Quarter", "🌒 Waning Crescent"
             ];
 
             const messages = [
@@ -53,12 +69,27 @@
                 "✦ time to wrap up ✦"
             ];
             
+            const moonPhases = isSouthernHemisphere ? southernPhases : northernPhases;
             const phaseText = moonPhases[phaseIndex].split(" ");
+            
             return `<div>${phaseText[0]} <span>${phaseText.slice(1).join(" ")}</span></div>
                     <div class='moon-message'>${messages[phaseIndex]}</div>`;
         }
 
-        document.getElementById("moonPhaseWidget").innerHTML = getMoonPhase();
+        function setMoonPhase() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const isSouthernHemisphere = position.coords.latitude < 0;
+                    document.getElementById("moonPhaseWidget").innerHTML = getMoonPhase(isSouthernHemisphere);
+                }, () => {
+                    document.getElementById("moonPhaseWidget").innerHTML = getMoonPhase(false); // Default to Northern Hemisphere
+                });
+            } else {
+                document.getElementById("moonPhaseWidget").innerHTML = getMoonPhase(false); // Default to Northern Hemisphere
+            }
+        }
+
+        setMoonPhase();
     </script>
 </body>
 </html>
